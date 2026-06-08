@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FM Modulation Calculator & Visualizer</title>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-wave-square"></i>
+                <h1>FM Modulation Visualizer</h1>
+            </div>
+            <div class="header-controls">
+                <button id="theme-toggle" class="icon-btn" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+                <button id="export-pdf" class="btn primary-btn"><i class="fa-solid fa-file-pdf"></i> Export Report</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content" id="report-content">
+            <div class="dashboard-grid">
+                
+                <!-- Left Panel: Controls -->
+                <div class="panel controls-panel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-sliders"></i> Parameters</h2>
+                            <button id="reset-btn" class="icon-btn small" title="Reset to Defaults"><i class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                        <div class="card-body">
+                            <!-- Carrier Frequency -->
+                            <div class="input-group">
+                                <label for="fc">Carrier Frequency (Fc)</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="fc" value="100" min="0" step="any">
+                                    <select id="fc-unit">
+                                        <option value="1">Hz</option>
+                                        <option value="1000" selected>kHz</option>
+                                        <option value="1000000">MHz</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Message Frequency -->
+                            <div class="input-group">
+                                <label for="fm">Message Frequency (Fm)</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="fm" value="5" min="0.001" step="any">
+                                    <select id="fm-unit">
+                                        <option value="1">Hz</option>
+                                        <option value="1000" selected>kHz</option>
+                                        <option value="1000000">MHz</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Frequency Deviation -->
+                            <div class="input-group">
+                                <label for="dev">Frequency Deviation (Δf)</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="dev" value="25" min="0" step="any">
+                                    <select id="dev-unit">
+                                        <option value="1">Hz</option>
+                                        <option value="1000" selected>kHz</option>
+                                        <option value="1000000">MHz</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculated Results -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-calculator"></i> Calculations</h2>
+                        </div>
+                        <div class="card-body results-body">
+                            <div class="result-box">
+                                <h3>Modulation Index (β)</h3>
+                                <div class="formula">β = Δf / Fm</div>
+                                <div class="calculation-step" id="beta-step">25 kHz / 5 kHz</div>
+                                <div class="result-value" id="beta-value">5.00</div>
+                                <div class="badge" id="fm-type">Wideband FM</div>
+                            </div>
+
+                            <div class="result-box">
+                                <h3>Carson's Rule Bandwidth</h3>
+                                <div class="formula">BW = 2(Δf + Fm)</div>
+                                <div class="calculation-step" id="bw-step">2(25 kHz + 5 kHz)</div>
+                                <div class="result-value" id="bw-value">60.00 kHz</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Educational Content -->
+                    <div class="card educational-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-book-open"></i> Theory & Learning</h2>
+                        </div>
+                        <div class="card-body" id="edu-content">
+                            <p><strong>Frequency Modulation (FM)</strong> is the encoding of information in a carrier wave by varying the instantaneous frequency of the wave.</p>
+                            <p id="edu-dynamic-text"></p>
+                            <h4>Applications</h4>
+                            <ul class="app-list">
+                                <li><i class="fa-solid fa-radio"></i> FM Radio Broadcasting</li>
+                                <li><i class="fa-solid fa-walkie-talkie"></i> Two-way Radio Systems</li>
+                                <li><i class="fa-solid fa-satellite"></i> Satellite Communication</li>
+                                <li><i class="fa-solid fa-satellite-dish"></i> Telemetry Systems</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Visualizations -->
+                <div class="panel visual-panel">
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-chart-line"></i> Time Domain Waveforms</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-controls">
+                                <label><input type="checkbox" id="show-msg" checked> Message Signal</label>
+                                <label><input type="checkbox" id="show-car" checked> Carrier Signal</label>
+                                <label><input type="checkbox" id="show-fm" checked> FM Signal</label>
+                            </div>
+                            <div id="time-chart" class="plotly-chart"></div>
+                        </div>
+                    </div>
+
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-chart-bar"></i> Frequency Spectrum</h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="spectrum-chart" class="plotly-chart"></div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
